@@ -7,11 +7,11 @@ exports.load = () => {
     if (!exports.config.corpora) {
         exports.config.corpora = {};
 
-        var shakespeare = fs.readFileSync("./modules/markov/romeoandjuiliet.txt").toString();
+        let shakespeare = fs.readFileSync("./modules/markov/romeoandjuiliet.txt").toString();
         exports.config.corpora["default"] = shakespeare;
     }
 
-    for (corpusName in exports.config.corpora) {
+    for (let corpusName in exports.config.corpora) {
         markovGenerator.addCorpus(corpusName, exports.config.corpora[corpusName]);
     }
 }
@@ -40,7 +40,7 @@ function addCorpus(api, event, corpusName, corpus) {
 }
 
 function listCorpora(api, event) {
-    var corporaNames = [];
+    let corporaNames = [];
     for (var key in markovGenerator.corpora) {
         corporaNames.push(key);
     }
