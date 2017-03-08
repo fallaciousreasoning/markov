@@ -1,11 +1,26 @@
 const MarkovGenerator = require("./markov.js");
+var fs = require("fs");
+
 let markovGenerator = new MarkovGenerator();
 
-exports.match = function (event, commandPrefix) {
+exports.load = () => {
+    if (!exports.config.corpora) {
+        exports.config.corpora = {};
+
+        var shakespeare = fs.readFileSync("./modules/markov/romeoandjuiliet.txt").toString();
+        exports.config.corpora["default"] = shakespeare;
+    }
+
+    for (corpusName in exports.config.corpora) {
+        markovGenerator.addCorpus(corpusName, exports.config.corpora[corpusName]);
+    }
+}
+
+exports.match = (event, commandPrefix) => {
     return event.arguments[0] === commandPrefix + 'markov';
 };
 
-exports.run = function (api, event) {
+exports.run = (api, event) => {
     if (event.arguments.length >= 4 && event.arguments[1] == 'add') {
         addCorpus(api, event, event.arguments[2], event.arguments.slice(3).join(" "));
     } else if (event.arguments.length == 2 && event.arguments[1] == 'list') {
@@ -20,6 +35,8 @@ exports.run = function (api, event) {
 function addCorpus(api, event, corpusName, corpus) {
     markovGenerator.addCorpus(corpusName, corpus);
     api.sendMessage("Added you your corpus '" + corpusName + "'", event.thread_id);
+
+    exports.config.corpora[corpusName] = corpus;
 }
 
 function listCorpora(api, event) {
