@@ -3,7 +3,6 @@ function buildChains(corpus, chainLength) {
     // characters.
     corpus = corpus.toLowerCase();
     let sentences = corpus.split('.').filter(sentence => sentence.length > 10);
-    let tokens = corpus.split(" ");
 
     let chains = {};
 
@@ -22,35 +21,38 @@ function parseSentence(sentence, chainLength, chains) {
 
     for (var i = 0; i < tokens.length; ++i) {
         var word = tokens[i],
-            sequence = [];
+            prefix = [];
+
+        //addForPrefix([], word, chains);
 
         // Build the sequence preceeding this word.
         for (var j = Math.min(chainLength, i); j >= 1; --j) {
-            sequence.push(tokens[i - j]);
+            prefix.push(tokens[i - j]);
         }
-
-        // Turn the sequence into a string so it makes a good property name.
-        sequence = sequence.join(" ");
-
-        // Create an empty object to use as a map if we haven't already.
-        if (!chains[sequence]) {
-            chains[sequence] = {};
-            chains[sequence]['@sum'] = 0;
-        }
-
-        // Make sure we have an entry for this word.
-        if (!chains[sequence][word]) {
-            chains[sequence][word] = 0;
-        }
-
-        // Add the count for this word.
-        chains[sequence][word]++;
-        // Keep track of how many words we've seen.
-        chains[sequence]['@sum']++;
+        addForPrefix(prefix, word, chains);
     }
 }
 
-console.log(buildChains("Hello World This is an example sentence that I am quite proud of because it is a work of art and exceedingly clever. Or something like that....", 2));
+function addForPrefix(prefix, word, chains) {
+    // Turn the prefix into a string so it makes a good property name.
+    prefix = prefix.join(" ");
+
+    // Create an empty object to use as a map if we haven't already.
+    if (!chains[prefix]) {
+        chains[prefix] = {};
+        chains[prefix]['@sum'] = 0;
+    }
+
+    // Make sure we have an entry for this word.
+    if (!chains[prefix][word]) {
+        chains[prefix][word] = 0;
+    }
+
+    // Add the count for this word.
+    chains[prefix][word]++;
+    // Keep track of how many words we've seen.
+    chains[prefix]['@sum']++;
+}
 
 class MarkovGenerator {
     constructor() {
@@ -70,8 +72,46 @@ class MarkovGenerator {
     generate(corpusName, length) {
         if (!this.corpora[corpusName]) return "That is not a thing (no such corpus).";
 
-        for (var i = 0; i < length; ++i) {
+        let corpus = this.corpora[corpusName];
+        let sentence = [];
 
+        for (var i = 0; i < length; ++i) {
+            sentence.push(this.getNextWord(corpus, sentence));
         }
+
+        return sentence.join(" ");
     }
+
+    getNextWord(corpus, sentence) {
+        var lastN = [];
+        for (var i = Math.min(corpus.n, sentence.length); i > 0; --i) {
+            lastN.push(sentence[sentence.length - i]);
+        }
+
+        let options = false;
+
+        let prefix = lastN.join(" ");
+        options = corpus.chains[prefix];
+
+        // If we have nowhere, give up.
+        if (!options) return "";
+
+        let pick = Math.floor(Math.random() * options['@sum']);
+        var runningSum = 0;
+        for (var key in options) {
+            if (key == '@sum') continue;
+            if (runningSum >= pick) return key;
+
+            runningSum += options[key];
+        }
+
+        // Should never reach here.
+        throw Error("I have no idea what's happening...");
+     }
 }
+
+var corpus = "Hello World This is an example sentence that I am quite proud of because it is a work of art and exceedingly clever. Or something like that....";
+let markov = new MarkovGenerator();
+markov.addCorpus("test", corpus);
+
+console.log(markov.generate("test", 5));
