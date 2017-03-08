@@ -110,8 +110,4 @@ class MarkovGenerator {
      }
 }
 
-var corpus = "Hello World This is an example sentence that I am quite proud of because it is a work of art and exceedingly clever. Or something like that....";
-let markov = new MarkovGenerator();
-markov.addCorpus("test", corpus);
-
-console.log(markov.generate("test", 5));
+module.exports = MarkovGenerator;

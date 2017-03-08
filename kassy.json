@@ -1,0 +1,11 @@
+﻿{
+  "name": "markov",
+  "version": 2.2,
+  "startup": "markov-module.js",
+  "command": "markov",
+  "help": [
+    [ "{{commandPrefix}}markov [corpus] [numWords]", "Generates a markov chain based on a corpus for a given number of words." ],
+    ["{{commandPrefix}}markov add [corpusName] [corpus]", "Adds a new corpus with name 'corpusName' and the text 'corpus'"],
+    ["{{commandPrefix}}markov list", "Lists the available corpora."]
+  ]
+}
