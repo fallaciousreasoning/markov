@@ -1,7 +1,8 @@
 function buildChains(corpus, chainLength) {
     // Break the corpus into sentences and only take sentences with more than 10
     // characters.
-    corpus = corpus.toLowerCase();
+    corpus = corpus.toLowerCase().replace("\n", ".");
+
     let sentences = corpus.split('.').filter(sentence => sentence.length > 10);
 
     let chains = {};
@@ -15,9 +16,12 @@ function buildChains(corpus, chainLength) {
 
 function parseSentence(sentence, chainLength, chains) {
     // We only want normal people characters (ASCII because we're racist).
-    sentence = sentence.replace(/[^\w^ ][]/g, "");
+    sentence = sentence.replace(/[^a-z^ ]/g, "");
 
     let tokens = sentence.split(" ").filter(token => token.length > 0);
+
+    // Ignore niggardly sentences with fewer than four words. Who even, amirite? <-- Irony. Heh.
+    if (tokens.count < 3) return;
 
     for (var i = 0; i < tokens.length; ++i) {
         var word = tokens[i],
@@ -100,10 +104,13 @@ class MarkovGenerator {
         var runningSum = 0;
         for (var key in options) {
             if (key == '@sum') continue;
-            if (runningSum >= pick) return key;
 
             runningSum += options[key];
+            if (runningSum >= pick) return key;
         }
+
+        console.log("Pick: " + pick + ", Sum: " + runningSum);
+        console.log(options);
 
         // Should never reach here.
         throw Error("I have no idea what's happening...");
