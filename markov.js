@@ -7,7 +7,7 @@ function buildChains(corpus, chainLength) {
 
     let chains = {};
 
-    for (var i = 0; i < sentences.length; ++i) {
+    for (let i = 0; i < sentences.length; ++i) {
         parseSentence(sentences[i], chainLength, chains);
     }
 
@@ -23,14 +23,14 @@ function parseSentence(sentence, chainLength, chains) {
     // Ignore niggardly sentences with fewer than four words. Who even, amirite? <-- Irony. Heh.
     if (tokens.count < 3) return;
 
-    for (var i = 0; i < tokens.length; ++i) {
-        var word = tokens[i],
+    for (let i = 0; i < tokens.length; ++i) {
+        let word = tokens[i],
             prefix = [];
 
         //addForPrefix([], word, chains);
 
         // Build the sequence preceeding this word.
-        for (var j = Math.min(chainLength, i); j >= 1; --j) {
+        for (let j = Math.min(chainLength, i); j >= 1; --j) {
             prefix.push(tokens[i - j]);
         }
         addForPrefix(prefix, word, chains);
@@ -79,7 +79,7 @@ class MarkovGenerator {
         let corpus = this.corpora[corpusName];
         let sentence = [];
 
-        for (var i = 0; i < length; ++i) {
+        for (let i = 0; i < length; ++i) {
             sentence.push(this.getNextWord(corpus, sentence));
         }
 
@@ -87,8 +87,8 @@ class MarkovGenerator {
     }
 
     getNextWord(corpus, sentence) {
-        var lastN = [];
-        for (var i = Math.min(corpus.n, sentence.length); i > 0; --i) {
+        let lastN = [];
+        for (let i = Math.min(corpus.n, sentence.length); i > 0; --i) {
             lastN.push(sentence[sentence.length - i]);
         }
 
@@ -101,8 +101,8 @@ class MarkovGenerator {
         if (!options) return "";
 
         let pick = Math.floor(Math.random() * options['@sum']);
-        var runningSum = 0;
-        for (var key in options) {
+        let runningSum = 0;
+        for (let key in options) {
             if (key == '@sum') continue;
 
             runningSum += options[key];

@@ -1,5 +1,5 @@
 const MarkovGenerator = require("./markov.js");
-var fs = require("fs");
+let fs = require("fs");
 
 let markovGenerator = new MarkovGenerator();
 
