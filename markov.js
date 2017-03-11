@@ -3,7 +3,7 @@ function buildChains(corpus, chainLength) {
     // characters.
     corpus = corpus.toLowerCase().replace("\n", ".");
 
-    let sentences = corpus.split('.').filter(sentence => sentence.length > 10);
+    let sentences = corpus.split(/[\.!\?\n]/).filter(sentence => sentence.length > 10);
 
     let chains = {};
 
