@@ -9,21 +9,6 @@ const fixCapitalisation = sentences => {
                 case 'ill':
                     sentences[i][j] = "I'll";
                     break;
-                case 'dont':
-                    sentences[i][j] = "don't";
-                    break;
-                case 'wont':
-                    sentences[i][j] = "won't";
-                    break;
-                case 'shouldnt':
-                    sentences[i][j] = "shouldn't";
-                    break;
-                case 'wouldnt':
-                    sentences[i][j] = "wouldn't";
-                    break;
-                case 'cant':
-                    sentences[i][j] = "can't";
-                    break;
             }
         }
     }
