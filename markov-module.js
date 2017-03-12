@@ -1,23 +1,18 @@
-const MarkovGenerator = require("./markov.js");
-let fs = require("fs");
+const MarkovGenerator = require('./markov.js');
+const fs = require('fs');
 
-let markovGenerator = new MarkovGenerator();
+const markovGenerator = new MarkovGenerator();
 
 exports.load = () => {
     if (!exports.config.corpora) {
         exports.config.corpora = {};
-
-        let shakespeare = fs.readFileSync("./modules/markov/romeoandjuiliet.txt").toString();
-        exports.config.corpora["default"] = shakespeare;
+        const shakespeare = fs.readFileSync('./modules/markov/romeoandjuiliet.txt').toString();
+        exports.config.corpora['default'] = shakespeare;
     }
 
     for (let corpusName in exports.config.corpora) {
         markovGenerator.addCorpus(corpusName, exports.config.corpora[corpusName]);
     }
-}
-
-exports.match = (event, commandPrefix) => {
-    return event.arguments[0] === commandPrefix + 'markov';
 };
 
 exports.run = (api, event) => {
@@ -32,23 +27,16 @@ exports.run = (api, event) => {
     }
 };
 
-function addCorpus(api, event, corpusName, corpus) {
+const addCorpus = (api, event, corpusName, corpus) => {
     markovGenerator.addCorpus(corpusName, corpus);
-    api.sendMessage("Added you your corpus '" + corpusName + "'", event.thread_id);
-
+    api.sendMessage(`Added you your corpus '${corpusName}'`, event.thread_id);
     exports.config.corpora[corpusName] = corpus;
-}
+};
 
-function listCorpora(api, event) {
-    let corporaNames = [];
-    for (var key in markovGenerator.corpora) {
-        corporaNames.push(key);
-    }
-    
-    api.sendMessage("Available Corpora:\n" +corporaNames.join("\n"), event.thread_id);
-}
+const listCorpora = (api, event) => {
+    api.sendMessage(`Available Corpora:\n${Object.keys(markovGenerator.corpora).join('\n')}`, event.thread_id);
+};
 
-function generate(api, event, corpusName, length) {
-    let message = markovGenerator.generate(corpusName, length);
-    api.sendMessage(message, event.thread_id);
-}
+const generate = (api, event, corpusName, length) => {
+    api.sendMessage(markovGenerator.generate(corpusName, length), event.thread_id);
+};

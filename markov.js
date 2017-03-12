@@ -1,4 +1,21 @@
-function buildChains(corpus, chainLength) {
+const fixCapitalisation = sentences => {
+    for (let i = 0; i < sentences.length; i++) {
+        sentences[i][0] = sentences[i][0].charAt(0).toUpperCase() + sentences[i][0].slice(1);
+        for (let j = 0; j < sentences[i].length; j++) {
+            switch (sentences[i][j].trim()) {
+                case 'i':
+                    sentences[i][j] = 'I';
+                    break;
+                case 'ill':
+                    sentences[i][j] = "I'll";
+                    break;
+            }
+        }
+    }
+    return sentences;
+};
+
+const buildChains = (corpus, chainLength) => {
     // Break the corpus into sentences and only take sentences with more than 10
     // characters.
     corpus = corpus.toLowerCase().replace("\n", ".");
@@ -12,9 +29,9 @@ function buildChains(corpus, chainLength) {
     }
 
     return chains;
-}
+};
 
-function parseSentence(sentence, chainLength, chains) {
+const parseSentence = (sentence, chainLength, chains) => {
     // We only want normal people characters (ASCII because we're racist).
     sentence = sentence.replace(/[^a-z^ ]/g, "");
 
@@ -35,9 +52,9 @@ function parseSentence(sentence, chainLength, chains) {
         }
         addForPrefix(prefix, word, chains);
     }
-}
+};
 
-function addForPrefix(prefix, word, chains) {
+const addForPrefix = (prefix, word, chains) => {
     // Turn the prefix into a string so it makes a good property name.
     prefix = prefix.join(" ");
 
@@ -56,7 +73,7 @@ function addForPrefix(prefix, word, chains) {
     chains[prefix][word]++;
     // Keep track of how many words we've seen.
     chains[prefix]['@sum']++;
-}
+};
 
 class MarkovGenerator {
     constructor() {
@@ -74,16 +91,24 @@ class MarkovGenerator {
     }
 
     generate(corpusName, length) {
-        if (!this.corpora[corpusName]) return "That is not a thing (no such corpus).";
+        if (!this.corpora[corpusName])
+            return 'That is not a thing (no such corpus).';
 
-        let corpus = this.corpora[corpusName];
+        const corpus = this.corpora[corpusName];
+        const sentences = [];
         let sentence = [];
 
         for (let i = 0; i < length; ++i) {
-            sentence.push(this.getNextWord(corpus, sentence));
+            let word = this.getNextWord(corpus, sentence);
+            if (word === '') {
+                sentences.push(sentence);
+                sentence = [];
+                word = this.getNextWord(corpus, sentence);
+            }
+            sentence.push(word);
         }
 
-        return sentence.join(" ");
+        return fixCapitalisation(sentences).map(s => s.join(' ')).join('. ') + '.';
     }
 
     getNextWord(corpus, sentence) {
@@ -92,28 +117,29 @@ class MarkovGenerator {
             lastN.push(sentence[sentence.length - i]);
         }
 
-        let options = false;
-
-        let prefix = lastN.join(" ");
-        options = corpus.chains[prefix];
+        let prefix = lastN.join(' ');
+        let options = corpus.chains[prefix];
 
         // If we have nowhere, give up.
-        if (!options) return "";
+        if (!options)
+            return '';
 
         let pick = Math.floor(Math.random() * options['@sum']);
         let runningSum = 0;
         for (let key in options) {
-            if (key == '@sum') continue;
+            if (key === '@sum')
+                continue;
 
             runningSum += options[key];
-            if (runningSum >= pick) return key;
+            if (runningSum >= pick)
+                return key;
         }
 
-        console.log("Pick: " + pick + ", Sum: " + runningSum);
-        console.log(options);
+        console.debug(`Pick: ${pick}, Sum: ${runningSum}`);
+        console.debug(options);
 
         // Should never reach here.
-        throw Error("I have no idea what's happening...");
+        throw new Error("I have no idea what's happening...");
      }
 }
 
