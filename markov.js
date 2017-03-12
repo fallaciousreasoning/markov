@@ -6,7 +6,7 @@ const fixCapitalisation = sentences => {
                 case 'i':
                     sentences[i][j] = 'I';
                     break;
-                case 'ill':
+                case 'i\'ll':
                     sentences[i][j] = "I'll";
                     break;
             }
@@ -16,11 +16,13 @@ const fixCapitalisation = sentences => {
 };
 
 const buildChains = (corpus, chainLength) => {
-    // Break the corpus into sentences and only take sentences with more than 10
-    // characters.
-    corpus = corpus.toLowerCase().replace("\n", ".");
-
-    let sentences = corpus.split(/[\.!\?\n]/).filter(sentence => sentence.length > 10);
+    // Convert the corpus to lower case and split on terminator characters,
+    // ensuring that each sentence has at least 10 characters so we don't end
+    // up with weird stumpy sentences
+    const sentences = corpus
+        .toLowerCase()
+        .split(/[\.!\?\n]/)
+        .filter(sentence => sentence.length > 10);
 
     let chains = {};
 
@@ -33,18 +35,19 @@ const buildChains = (corpus, chainLength) => {
 
 const parseSentence = (sentence, chainLength, chains) => {
     // We only want normal people characters (ASCII because we're racist).
-    sentence = sentence.replace(/[^a-z^ ]/g, "");
+    // a-z and ' chars that are surrounded by letters
+    sentence = sentence
+        .replace(/[^a-z^ ^']|/g, '')
+        .replace(/ '|' /g, '');
 
-    let tokens = sentence.split(" ").filter(token => token.length > 0);
+    const tokens = sentence.split(' ').filter(token => token.length > 0);
 
-    // Ignore niggardly sentences with fewer than four words. Who even, amirite? <-- Irony. Heh.
+    // Ignore niggardly sentences with fewer than three words.
     if (tokens.count < 3) return;
 
     for (let i = 0; i < tokens.length; ++i) {
         let word = tokens[i],
             prefix = [];
-
-        //addForPrefix([], word, chains);
 
         // Build the sequence preceeding this word.
         for (let j = Math.min(chainLength, i); j >= 1; --j) {
@@ -106,6 +109,10 @@ class MarkovGenerator {
                 word = this.getNextWord(corpus, sentence);
             }
             sentence.push(word);
+        }
+
+        if (sentence.length > 0) {
+            sentences.push(sentence);
         }
 
         return fixCapitalisation(sentences).map(s => s.join(' ')).join('. ') + '.';
